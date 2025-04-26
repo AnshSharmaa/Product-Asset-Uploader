@@ -24,7 +24,7 @@ export default function Home() {
     category: "",
     tags: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [toastData, setToastData] = useState<ToastData>({
@@ -62,8 +62,17 @@ export default function Home() {
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    setIsSubmitting(true);
     e.preventDefault();
+    
+    if (images.length === 0) {
+      handleToast({ 
+        message: "At least one image is required", 
+        isError: true 
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
     console.log("Product Info:", formData);
     console.log(
       "Images:",
@@ -109,7 +118,12 @@ export default function Home() {
           className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12"
         >
           {isSubmitting && (
-            <div className="absolute top-0 left-0 w-full h-full bg-black/20 backdrop-blur-sm z-20 flex justify-center items-center rounded-lg"></div>
+            <div className="absolute top-0 left-0 w-full h-full bg-black/20 backdrop-blur-sm z-20 flex justify-center items-center rounded-lg">
+               <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-foreground font-medium">{isSuccess ? "Success!" : "Uploading..."}</p>
+              </div>
+            </div>
           )}
 
           <div className="flex flex-col space-y-6">
@@ -126,7 +140,9 @@ export default function Home() {
           {/* Image Uploader Section */}
           <div className="flex flex-col space-y-4">
             <h2 className="text-xl font-semibold mb-2 text-foreground">
-              Product Images (Max 3)
+              Product Images <span className="text-sm font-normal">
+                <span className="text-destructive">*</span> (At least 1 and maximum 3)
+              </span>
             </h2>
             <ImageUploader
               images={images}
