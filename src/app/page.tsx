@@ -24,7 +24,7 @@ export default function Home() {
     category: "",
     tags: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [toastData, setToastData] = useState<ToastData>({
