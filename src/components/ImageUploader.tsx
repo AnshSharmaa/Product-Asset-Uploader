@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 import { ImageUploaderProps, SupportedImageType } from "@/types/index";
+import { UploadIcon, TrashIcon, CloseIcon, ImageIcon } from "./icons";
 
 export default function ImageUploader({
   images,
@@ -176,21 +177,7 @@ export default function ImageUploader({
       >
         {isLoading ? (
           <div className="flex animate-pulse flex-col items-center justify-center">
-            <svg
-              className="mb-3 size-10 text-primary"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
-            </svg>
+            <UploadIcon className="mb-3 size-10 text-primary" />
             <p className="text-sm text-muted-foreground">
               Processing images...
             </p>
@@ -205,25 +192,13 @@ export default function ImageUploader({
                 images.length >= maxImages ? "bg-muted" : "bg-primary/10"
               }`}
             >
-              <svg
+              <UploadIcon
                 className={`size-7 ${
                   images.length >= maxImages
                     ? "text-muted-foreground"
                     : "text-primary"
                 }`}
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
+              />
             </div>
 
             {images.length >= maxImages ? (
@@ -253,9 +228,30 @@ export default function ImageUploader({
               </div>
             )}
 
+            
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          id="dropzone-file"
+          type="file"
+          className="hidden"
+          multiple
+          accept="image/png, image/jpeg, image/gif"
+          onChange={handleFileChange}
+          disabled={images.length >= maxImages || isLoading}
+          aria-label="Upload images"
+        />
+      </div>
+
+      {/* Image Actions */}
+      {images.length > 0 && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
             {images.length > 0 && (
-              <div className="mt-3 flex items-center gap-1">
+              <div className="flex items-center gap-1">
                 <div className="flex -space-x-2">
+                  {/* mini thumbnail */}
                   {previews.slice(0, 3).map((src, index) => (
                     <div
                       key={`mini-${index}`}
@@ -277,57 +273,13 @@ export default function ImageUploader({
               </div>
             )}
           </div>
-        )}
-        <input
-          ref={fileInputRef}
-          id="dropzone-file"
-          type="file"
-          className="hidden"
-          multiple
-          accept="image/png, image/jpeg, image/gif"
-          onChange={handleFileChange}
-          disabled={images.length >= maxImages || isLoading}
-          aria-label="Upload images"
-        />
-      </div>
-
-      {/* Image Actions */}
-      {images.length > 0 && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <div
-              className={`size-2 rounded-full ${
-                images.length === maxImages ? "bg-amber-500" : "bg-green-500"
-              }`}
-            ></div>
-            <p className="text-xs text-muted-foreground">
-              {images.length === maxImages
-                ? "Maximum limit reached"
-                : `${images.length} of ${maxImages} images uploaded`}
-            </p>
-          </div>
           <button
             type="button"
             onClick={handleClearAllImages}
             className="flex items-center gap-1 rounded-md bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive transition-colors hover:bg-destructive/20 focus:outline-none focus:ring-2 focus:ring-destructive/40 focus:ring-offset-1"
             aria-label="Clear all images"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="size-3"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 6h18" />
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-              <line x1="10" y1="11" x2="10" y2="17" />
-              <line x1="14" y1="11" x2="14" y2="17" />
-            </svg>
+            <TrashIcon className="size-3" />
             Clear all Images
           </button>
         </div>
@@ -364,18 +316,7 @@ export default function ImageUploader({
                   className="absolute right-1 top-1 z-20 rounded-full bg-destructive/80 p-1 text-destructive-foreground opacity-0 transition-opacity duration-200 ease-in-out hover:bg-destructive focus:outline-none focus:ring-2 focus:ring-destructive/10 group-hover:opacity-100"
                   aria-label={`Remove image ${index + 1}`}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="size-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <CloseIcon className="size-4" />
                 </button>
                 <div className="absolute bottom-2 left-2 z-20 rounded bg-black/70 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
                   Image {index + 1}
@@ -417,20 +358,7 @@ export default function ImageUploader({
               }
             >
               <div className="mb-2 flex size-10 items-center justify-center rounded-full bg-muted/30">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="size-5 text-muted-foreground"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect width="18" height="18" x="3" y="3" rx="2" />
-                  <circle cx="9" cy="9" r="2" />
-                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                </svg>
+                <ImageIcon className="size-5 text-muted-foreground" />
               </div>
               <p className="text-center text-xs text-muted-foreground">
                 {images.length < maxImages ? "Add image" : "Slot unavailable"}

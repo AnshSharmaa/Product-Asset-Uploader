@@ -6,6 +6,12 @@ import {
   ValidationErrors, 
   FormField 
 } from "@/types/index";
+import { 
+  AlertIcon, 
+  CheckIcon, 
+  ArrowRightIcon, 
+  ChevronDownIcon 
+} from "./icons";
 
 const categories: ProductCategory[] = [
   "T-shirt",
@@ -51,7 +57,6 @@ export default function ProductForm({
     } else if (formData.title.trim().length < 3) {
       newErrors.title = "Product title should be at least 3 characters";
     }
-
     if (!formData.category) {
       newErrors.category = "Please select a category";
     }
@@ -154,33 +159,9 @@ export default function ProductForm({
             }
           />
           {titleStatus === "error" ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-destructive"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" x2="12" y1="8" y2="12" />
-              <line x1="12" x2="12.01" y1="16" y2="16" />
-            </svg>
+            <AlertIcon className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-destructive" />
           ) : titleStatus === "valid" ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-green-500"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
+            <CheckIcon className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-green-500" />
           ) : null}
         </div>
         {shouldShowError("title") && (
@@ -188,20 +169,7 @@ export default function ProductForm({
             id="title-error"
             className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="size-3"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 8h13" />
-              <path d="m18 7 5 5-5 5" />
-              <path d="M3 16h13" />
-            </svg>
+            <ArrowRightIcon className="size-3" />
             {errors.title}
           </p>
         )}
@@ -239,7 +207,7 @@ export default function ProductForm({
             ))}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <svg
+            <ChevronDownIcon
               className={`size-4 transition-colors duration-200 ${
                 shouldShowError("category")
                   ? "text-destructive"
@@ -247,19 +215,7 @@ export default function ProductForm({
                   ? "text-primary"
                   : "text-muted-foreground"
               }`}
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            />
           </div>
         </div>
         {shouldShowError("category") && (
@@ -267,20 +223,7 @@ export default function ProductForm({
             id="category-error"
             className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="size-3"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 8h13" />
-              <path d="m18 7 5 5-5 5" />
-              <path d="M3 16h13" />
-            </svg>
+            <ArrowRightIcon className="size-3" />
             {errors.category}
           </p>
         )}
@@ -289,102 +232,40 @@ export default function ProductForm({
       <div className="group">
         <label
           htmlFor="tags"
-          className="mb-2 flex text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
+          className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
         >
-          Tags
-          {formData.tags && (
+          <span>Tags (comma separated, optional)</span>
+          {parsedTags.length > 0 && (
             <span className="ml-auto text-xs text-muted-foreground">
-              {parsedTags.length} tags
+              {parsedTags.length} tag{parsedTags.length !== 1 ? "s" : ""}
             </span>
           )}
         </label>
-        <div className="relative">
-          <input
-            type="text"
-            id="tags"
-            name="tags"
-            value={formData.tags}
-            onChange={(e) => {
-              onTagsChange(e);
-              setTouched((prev) => ({ ...prev, tags: true }));
-            }}
-            onFocus={() => handleFocus("tags")}
-            onBlur={() => handleBlur("tags")}
-            className={getInputClasses("tags")}
-            placeholder="e.g., summer, casual, cotton (comma-separated)"
-            aria-invalid={!!shouldShowError("tags")}
-            aria-describedby={
-              shouldShowError("tags") ? "tags-error" : undefined
-            }
-          />
-          {formData.tags && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <div
-                className={`size-2 rounded-full ${
-                  shouldShowError("tags")
-                    ? "bg-destructive"
-                    : parsedTags.length > 0
-                    ? "bg-green-500"
-                    : "bg-muted"
-                }`}
-              ></div>
-            </div>
-          )}
-        </div>
-        {shouldShowError("tags") ? (
-          <p
-            id="tags-error"
-            className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="size-3"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m21 8-5 5 5 5" />
-              <path d="M3 8h13" />
-              <path d="M3 16h13" />
-            </svg>
-            {errors.tags}
-          </p>
-        ) : (
-          <div className="mt-1.5 flex items-start gap-1.5">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="mt-0.5 size-3.5 text-muted-foreground"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-            </svg>
-            <p className="flex-1 text-xs text-muted-foreground">
-              Add descriptive tags separated by commas to help categorize your
-              product. Good tags improve searchability.
-            </p>
-          </div>
-        )}
+        <input
+          type="text"
+          id="tags"
+          name="tags"
+          value={formData.tags}
+          onChange={(e) => {
+            handleChange(e);
+            onTagsChange(e);
+          }}
+          onFocus={() => handleFocus("tags")}
+          onBlur={() => handleBlur("tags")}
+          className={getInputClasses("tags")}
+          placeholder="e.g., summer, beach, vacation"
+        />
 
-        {parsedTags.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {parsedTags.map((tag, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs text-primary"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
+        <div className="mt-2 flex flex-wrap gap-1">
+          {parsedTags.map((tag, index) => (
+            <span
+              key={`${tag}-${index}`}
+              className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );

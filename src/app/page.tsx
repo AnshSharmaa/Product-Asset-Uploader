@@ -6,6 +6,7 @@ import { ProductFormData, ProductCategory, ToastData } from "@/types/index";
 import ProductForm from "@/components/ProductForm";
 import ImageUploader from "@/components/ImageUploader";
 import Toast from "@/components/Toast";
+import { PencilIcon, ImageIcon } from "@/components/icons";
 
 export default function Home() {
   const [formData, setFormData] = useState<ProductFormData>({
@@ -129,7 +130,7 @@ export default function Home() {
         duration={toastData.duration}
       />
       <div className="container mx-auto max-w-8xl">
-        <div className="relative overflow-hidden rounded-xl border border-border/50 p-6 text-card-foreground shadow-xl backdrop-blur-sm md:p-8">
+        <div className="relative overflow-hidden rounded-xl border border-border/50 p-6 text-card-foreground shadow-md backdrop-blur-sm md:p-8">
            <div className="relative z-10 mb-8">
             <h1 className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-center text-2xl font-bold text-transparent md:text-3xl">
               Product Asset Uploader
@@ -158,20 +159,7 @@ export default function Home() {
             <div className="flex flex-col space-y-6">
               <div className="flex items-center space-x-2">
                 <div className="rounded-lg bg-primary/10 p-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-primary"
-                  >
-                    <path d="M20.91 8.84 8.56 21.18a4.3 4.3 0 0 1-6.07-6.07L14.84 3.11a2.93 2.93 0 0 1 4.13 4.13l-12.4 12.39a1.56 1.56 0 0 1-2.2-2.2L15.89 5.92" />
-                  </svg>
+                  <PencilIcon className="text-primary size-5" />
                 </div>
                 <h2 className="text-xl font-semibold text-foreground">
                   Product Information
@@ -190,22 +178,7 @@ export default function Home() {
             <div className="flex flex-col space-y-6">
               <div className="flex items-center space-x-2">
                 <div className="rounded-lg bg-primary/10 p-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-primary"
-                  >
-                    <rect width="18" height="18" x="3" y="3" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                  </svg>
+                  <ImageIcon className="text-primary size-5" />
                 </div>
                 <h2 className="text-xl font-semibold text-foreground">
                   Product Images
