@@ -2,28 +2,31 @@ import { useEffect } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface ToastProps {
-  message: string;
-  isError?: boolean;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const Toast: React.FC<ToastProps> = ({ message, isError, isOpen, onClose }) => {
+const Toast: React.FC<ToastProps> = ({
+  message,
+  isError = false,
+  isOpen,
+  onClose,
+  duration = 2000,
+}) => {
   useEffect(() => {
     if (isOpen) {
-      const t = setTimeout(onClose, 2000);
+      const t = setTimeout(onClose, duration);
       return () => clearTimeout(t);
     }
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, duration]);
 
+  // Don't render anything if the toast is closed
   if (!isOpen) return null;
+
+  // Determine the variant based on the isError prop
+  const variant: ToastVariant = isError ? "error" : "success";
 
   return (
     <div
       className={cn(
         "fixed bottom-4 right-4 z-50 max-w-sm w-full shadow-lg flex items-center gap-3 p-4 rounded-lg backdrop-blur-sm transition-all duration-300 transform",
-        isError
+        variant === "error"
           ? "bg-destructive/90 text-destructive-foreground border border-destructive/20"
           : "bg-primary/90 text-primary-foreground border border-primary/20"
       )}
@@ -33,13 +36,15 @@ const Toast: React.FC<ToastProps> = ({ message, isError, isOpen, onClose }) => {
       <div
         className={cn(
           "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
-          isError ? "bg-destructive-foreground/20" : "bg-primary-foreground/20"
+          variant === "error"
+            ? "bg-destructive-foreground/20"
+            : "bg-primary-foreground/20"
         )}
       >
-        {isError ? (
+        {variant === "error" ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
+            className="size-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -54,7 +59,7 @@ const Toast: React.FC<ToastProps> = ({ message, isError, isOpen, onClose }) => {
         ) : (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
+            className="size-5"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -67,7 +72,7 @@ const Toast: React.FC<ToastProps> = ({ message, isError, isOpen, onClose }) => {
           </svg>
         )}
       </div>
-      <div className="flex-1 mr-2">
+      <div className="mr-2 flex-1">
         <p className="font-medium">{message}</p>
       </div>
       <button
@@ -75,21 +80,21 @@ const Toast: React.FC<ToastProps> = ({ message, isError, isOpen, onClose }) => {
         className={cn(
           "p-1.5 rounded-full hover:bg-white/10 transition-colors",
           "focus:outline-none focus:ring-2 focus:ring-offset-2",
-          isError
+          variant === "error"
             ? "focus:ring-destructive-foreground/50"
             : "focus:ring-primary-foreground/50"
         )}
         aria-label="Close notification"
         aria-live="polite"
       >
-        <X className="h-4 w-4" />
+        <X className="size-4" />
       </button>
 
       {/* Progress bar */}
-      <div className="absolute bottom-0 left-0 h-1 bg-white/20 rounded-b-lg w-full overflow-hidden">
+      <div className="absolute bottom-0 left-0 h-1 w-full overflow-hidden rounded-b-lg bg-white/20">
         <div
-          className="h-full bg-white/30 animate-shrink origin-left"
-          style={{ animationDuration: "2s" }}
+          className="animate-shrink h-full origin-left bg-white/30"
+          style={{ animationDuration: `${duration}ms` }}
         />
       </div>
     </div>

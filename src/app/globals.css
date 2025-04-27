@@ -115,7 +115,6 @@ body {
     }
   }
 
-
   .animate-progress-indeterminate {
     animation: progress-indeterminate 1.5s infinite ease-in-out;
   }
@@ -123,5 +122,4 @@ body {
   .animate-shrink {
     animation: shrink 3s linear forwards;
   }
-
 }

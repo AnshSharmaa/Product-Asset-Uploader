@@ -3,13 +3,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 
-interface ImageUploaderProps {
-  images: File[];
-  onImagesChange: (images: File[]) => void;
-  maxImages: number;
-  onImageError: (message: string) => void;
-}
-
 export default function ImageUploader({
   images,
   onImagesChange,
@@ -22,7 +15,11 @@ export default function ImageUploader({
 
   // Handle file validation
   const validateFiles = (files: File[]): File[] => {
-    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+    const validTypes: SupportedImageType[] = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+    ];
     return files.filter((file) => {
       if (!validTypes.includes(file.type)) {
         onImageError(
@@ -34,31 +31,34 @@ export default function ImageUploader({
     });
   };
 
+  const processFiles = useCallback(
+    (files: File[]) => {
+      setIsLoading(true);
+      const validFiles = validateFiles(files);
+
+      if (validFiles.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+
+      const totalImages = images.length + validFiles.length;
+      if (totalImages > maxImages) {
+        onImageError(`You can only upload a maximum of ${maxImages} images.`);
+        setIsLoading(false);
+        return;
+      }
+
+      // Update files state with valid files
+      onImagesChange([...images, ...validFiles]);
+    },
+    [images, onImagesChange, onImageError, validateFiles]
+  );
+
   const handleFileChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files;
       if (files) {
-        setIsLoading(true);
-        const newFiles = Array.from(files);
-        const validFiles = validateFiles(newFiles);
-
-        if (validFiles.length === 0) {
-          setIsLoading(false);
-          return;
-        }
-
-        const totalImages = images.length + validFiles.length;
-        if (totalImages > maxImages) {
-          onImageError(`You can only upload a maximum of ${maxImages} images.`);
-          setIsLoading(false);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-          }
-          return;
-        }
-
-        // Update files state with valid files
-        onImagesChange([...images, ...validFiles]);
+        processFiles(Array.from(files));
 
         // Clear the input after processing files
         if (fileInputRef.current) {
@@ -66,14 +66,13 @@ export default function ImageUploader({
         }
       }
     },
-    [images, onImagesChange, maxImages, onImageError]
+    [processFiles]
   );
 
   const handleRemoveImage = useCallback(
     (indexToRemove: number) => {
-      const updatedImages = images.filter(
-        (_, index) => index !== indexToRemove
-      );
+      const updatedImages = [...images];
+      updatedImages.splice(indexToRemove, 1);
       onImagesChange(updatedImages);
     },
     [images, onImagesChange]
@@ -96,7 +95,7 @@ export default function ImageUploader({
     previews.forEach(URL.revokeObjectURL);
 
     // Create new URL objects for the current images
-    const urls = images.map((file) => URL.createObjectURL(file));
+    const urls = images.map((file: File) => URL.createObjectURL(file));
     setPreviews(urls);
 
     // Cleanup function to revoke URLs when component unmounts or images change
@@ -114,7 +113,7 @@ export default function ImageUploader({
   return (
     <div className="flex flex-col space-y-4">
       <div
-        className={`flex flex-col items-center justify-center w-full h-52 border-2 rounded-xl transition-all duration-200 ease-in-out ${getUploadZoneClasses()}`}
+        className={`flex h-52 w-full flex-col items-center justify-center rounded-xl border-2 transition-all duration-200 ease-in-out ${getUploadZoneClasses()}`}
         onClick={() =>
           images.length < maxImages && fileInputRef.current?.click()
         }
@@ -132,9 +131,9 @@ export default function ImageUploader({
         }}
       >
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center animate-pulse">
+          <div className="flex animate-pulse flex-col items-center justify-center">
             <svg
-              className="w-10 h-10 mb-3 text-primary"
+              className="mb-3 size-10 text-primary"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -151,19 +150,19 @@ export default function ImageUploader({
             <p className="text-sm text-muted-foreground">
               Processing images...
             </p>
-            <div className="mt-3 w-24 h-1 bg-muted-foreground/20 rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full animate-progress-indeterminate"></div>
+            <div className="mt-3 h-1 w-24 overflow-hidden rounded-full bg-muted-foreground/20">
+              <div className="animate-progress-indeterminate h-full rounded-full bg-primary"></div>
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-5 px-4 text-center">
+          <div className="flex flex-col items-center justify-center px-4 py-5 text-center">
             <div
-              className={`p-3 mb-2 rounded-full ${
+              className={`mb-2 rounded-full p-3 ${
                 images.length >= maxImages ? "bg-muted" : "bg-primary/10"
               }`}
             >
               <svg
-                className={`w-7 h-7 ${
+                className={`size-7 ${
                   images.length >= maxImages
                     ? "text-muted-foreground"
                     : "text-primary"
@@ -184,41 +183,40 @@ export default function ImageUploader({
             </div>
 
             {images.length >= maxImages ? (
-              <p className="mb-1 text-md font-semibold text-foreground">
-                {" "}
-                Maximum images reached{" "}
+              <p className="mb-1 text-base font-semibold text-foreground">
+                Maximum images reached
               </p>
             ) : (
               <div>
                 <p className="mb-1 text-sm font-medium text-muted-foreground">
                   <span>
                     Drag and drop or{" "}
-                    <span className="text-primary underline underline-offset-2 decoration-primary/30">
+                    <span className="text-primary underline decoration-primary/30 underline-offset-2">
                       Click here to upload
                     </span>
                   </span>
                 </p>
-                <p className="text-xs text-muted-foreground max-w-[20rem]">
+                <p className="max-w-80 text-xs text-muted-foreground">
                   Upload high-resolution product images for best experience
-                  (PNG, JPG, GIF)
+                  <span className="mt-0.5 block">(PNG, JPG, GIF)</span>
                 </p>
               </div>
             )}
 
             {images.length > 0 && (
-              <div className="flex items-center gap-1 mt-3">
+              <div className="mt-3 flex items-center gap-1">
                 <div className="flex -space-x-2">
                   {previews.slice(0, 3).map((src, index) => (
                     <div
                       key={`mini-${index}`}
-                      className="w-6 h-6 rounded-full border border-border overflow-hidden ring-1 ring-background"
+                      className="size-6 overflow-hidden rounded-full border border-border ring-1 ring-background"
                     >
                       <Image
                         src={src}
                         alt={`Thumbnail ${index + 1}`}
                         width={24}
                         height={24}
-                        className="w-full h-full object-cover"
+                        className="size-full object-cover"
                       />
                     </div>
                   ))}
@@ -245,10 +243,10 @@ export default function ImageUploader({
 
       {/* Image Actions */}
       {images.length > 0 && (
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <div
-              className={`w-2 h-2 rounded-full ${
+              className={`size-2 rounded-full ${
                 images.length === maxImages ? "bg-amber-500" : "bg-green-500"
               }`}
             ></div>
@@ -261,12 +259,12 @@ export default function ImageUploader({
           <button
             type="button"
             onClick={handleClearAllImages}
-            className="text-xs px-2.5 py-1.5 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-destructive/40 flex items-center gap-1"
+            className="flex items-center gap-1 rounded-md bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive transition-colors hover:bg-destructive/20 focus:outline-none focus:ring-2 focus:ring-destructive/40 focus:ring-offset-1"
             aria-label="Clear all images"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-3 w-3"
+              className="size-3"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -286,98 +284,116 @@ export default function ImageUploader({
       )}
 
       {/* Image Previews */}
-      {
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {Array.from({ length: maxImages }).map((_, index) => {
-            // If we have an image for this slot, show the actual image
-            if (index < previews.length) {
-              const src = previews[index];
-              return (
-                <div
-                  key={`preview-${index}`}
-                  className="relative group aspect-square rounded-lg overflow-hidden border border-border bg-card/50 transition-all duration-200 hover:shadow-md"
-                >
-                  <Image
-                    src={src}
-                    alt={`Preview ${index + 1}`}
-                    width={200}
-                    height={200}
-                    className="object-cover w-full h-full rounded-lg relative z-10 transition-transform group-hover:scale-[1.10]"
-                    onError={() =>
-                      console.error(`Error loading preview ${index + 1}`)
-                    }
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveImage(index);
-                    }}
-                    className="absolute top-1 right-1 bg-destructive/80 text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out hover:bg-destructive focus:outline-none focus:ring-2 focus:ring-destructive/10 z-20"
-                    aria-label={`Remove image ${index + 1}`}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                  <div className="absolute bottom-2 left-2 z-20 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                    Image {index + 1}
-                  </div>
-                </div>
-              );
-            }
-            // Otherwise show a placeholder for this slot
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3" aria-live="polite">
+        {Array.from({ length: maxImages }).map((_, index) => {
+          // If we have an image for this slot, show the actual image
+          if (index < previews.length) {
+            const src = previews[index];
             return (
               <div
-                key={`placeholder-${index}`}
-                className="aspect-square rounded-lg border border-dashed border-border bg-muted/20 flex flex-col items-center justify-center p-4 transition-all duration-200 hover:bg-muted/30"
-                onClick={() => images.length < maxImages && fileInputRef.current?.click()}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if ((e.key === "Enter" || e.key === " ") && images.length < maxImages) {
-                    fileInputRef.current?.click();
-                  }
-                }}
+                key={`preview-${index}`}
+                className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-card/50 transition-all duration-200 hover:shadow-md"
               >
-                <div className="w-10 h-10 rounded-full bg-muted/30 flex items-center justify-center mb-2">
+                <Image
+                  src={src}
+                  alt={`Product image ${index + 1}`}
+                  width={200}
+                  height={200}
+                  className="relative z-10 size-full rounded-lg object-cover transition-transform group-hover:scale-[1.10]"
+                  onError={() =>
+                    onImageError(`Error loading preview ${index + 1}`)
+                  }
+                  priority={index === 0} // Prioritize loading the first image
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveImage(index);
+                  }}
+                  className="absolute right-1 top-1 z-20 rounded-full bg-destructive/80 p-1 text-destructive-foreground opacity-0 transition-opacity duration-200 ease-in-out hover:bg-destructive focus:outline-none focus:ring-2 focus:ring-destructive/10 group-hover:opacity-100"
+                  aria-label={`Remove image ${index + 1}`}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-muted-foreground"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    className="size-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
                   >
-                    <rect width="18" height="18" x="3" y="3" rx="2" />
-                    <circle cx="9" cy="9" r="2" />
-                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
                   </svg>
+                </button>
+                <div className="absolute bottom-2 left-2 z-20 rounded bg-black/70 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  Image {index + 1}
                 </div>
-                <p className="text-xs text-center text-muted-foreground">
-                  {images.length < maxImages ? "Add image" : "Slot empty"}
-                </p>
-                {images.length < maxImages && (
-                  <p className="text-[10px] text-center text-muted-foreground/70 mt-1">
-                    Click to upload
-                  </p>
-                )}
               </div>
             );
-          })}
-        </div>
-      }
+          }
+          // Otherwise show a placeholder for this slot
+          return (
+            <div
+              key={`placeholder-${index}`}
+              className={`
+                flex aspect-square flex-col items-center justify-center 
+                rounded-lg border border-dashed border-border bg-muted/20 p-4
+                transition-all duration-200
+                ${
+                  images.length < maxImages
+                    ? "cursor-pointer hover:bg-muted/30"
+                    : "opacity-50"
+                }
+              `}
+              onClick={() =>
+                images.length < maxImages && fileInputRef.current?.click()
+              }
+              role={images.length < maxImages ? "button" : "presentation"}
+              tabIndex={images.length < maxImages ? 0 : -1}
+              onKeyDown={(e) => {
+                if (
+                  (e.key === "Enter" || e.key === " ") &&
+                  images.length < maxImages
+                ) {
+                  fileInputRef.current?.click();
+                }
+              }}
+              aria-label={
+                images.length < maxImages
+                  ? "Add product image"
+                  : "Image slot unavailable"
+              }
+            >
+              <div className="mb-2 flex size-10 items-center justify-center rounded-full bg-muted/30">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="size-5 text-muted-foreground"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect width="18" height="18" x="3" y="3" rx="2" />
+                  <circle cx="9" cy="9" r="2" />
+                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                </svg>
+              </div>
+              <p className="text-center text-xs text-muted-foreground">
+                {images.length < maxImages ? "Add image" : "Slot unavailable"}
+              </p>
+              {images.length < maxImages && (
+                <p className="mt-1 text-center text-[10px] text-muted-foreground/70">
+                  Click to upload
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

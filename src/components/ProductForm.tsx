@@ -1,27 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-interface FormData {
-  title: string;
-  category: string;
-  tags: string;
-}
-
-interface ValidationErrors {
-  title?: string;
-  category?: string;
-  tags?: string;
-}
-
-interface ProductFormProps {
-  formData: FormData;
-  onFormChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => void;
-  onTagsChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-const categories = [
+const categories: ProductCategory[] = [
   "T-shirt",
   "Dress",
   "Hoodie",
@@ -36,12 +16,13 @@ export default function ProductForm({
   onTagsChange,
 }: ProductFormProps) {
   const [errors, setErrors] = useState<ValidationErrors>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({
+  const [touched, setTouched] = useState<Record<FormField, boolean>>({
     title: false,
     category: false,
     tags: false,
+    images: false,
   });
-  const [focused, setFocused] = useState<string | null>(null);
+  const [focused, setFocused] = useState<FormField | null>(null);
 
   // Reset touched state when formData is reset (empty title indicates form reset)
   useEffect(() => {
@@ -50,6 +31,7 @@ export default function ProductForm({
         title: false,
         category: false,
         tags: false,
+        images: false,
       });
     }
   }, [formData]);
@@ -72,32 +54,34 @@ export default function ProductForm({
   }, [formData]);
 
   // Handle field blur (mark field as touched)
-  const handleBlur = (field: string) => {
+  const handleBlur = (field: FormField): void => {
     setTouched((prev) => ({ ...prev, [field]: true }));
     setFocused(null);
   };
 
   // Handle field focus
-  const handleFocus = (field: string) => {
+  const handleFocus = (field: FormField): void => {
     setFocused(field);
   };
 
   // Handle field change with custom wrapper
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  ): void => {
     onFormChange(e);
     // Mark field as touched when user starts typing
-    setTouched((prev) => ({ ...prev, [e.target.name]: true }));
+    const fieldName = e.target.name as FormField;
+    setTouched((prev) => ({ ...prev, [fieldName]: true }));
   };
 
   // Only show errors for touched fields
-  const shouldShowError = (field: keyof ValidationErrors) => {
-    return touched[field] && errors[field];
+  const shouldShowError = (field: FormField): boolean => {
+    // Check that the field exists in errors
+    return touched[field] && !!errors[field as keyof ValidationErrors];
   };
 
   // Get input classes based on state
-  const getInputClasses = (field: keyof ValidationErrors) => {
+  const getInputClasses = (field: FormField): string => {
     return `bg-card border ${
       shouldShowError(field)
         ? "border-destructive shadow-sm shadow-destructive/10"
@@ -107,12 +91,34 @@ export default function ProductForm({
     } text-foreground text-sm rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary block w-full p-2.5 transition-all duration-200 ease-in-out`;
   };
 
+  /**
+   * Gets validation status for display in UI
+   */
+  const getTitleValidationStatus = (): "error" | "valid" | null => {
+    if (shouldShowError("title")) return "error";
+    if (formData.title && formData.title.trim().length >= 3) return "valid";
+    return null;
+  };
+
+  /**
+   * Parses and filters tags from comma-separated string
+   */
+  const parseTagsFromString = (tagsString: string): string[] => {
+    return tagsString
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+  };
+
+  const titleStatus = getTitleValidationStatus();
+  const parsedTags = formData.tags ? parseTagsFromString(formData.tags) : [];
+
   return (
     <div className="space-y-5">
       <div className="group">
         <label
           htmlFor="title"
-          className="flex items-center gap-1.5 mb-2 text-sm font-medium text-foreground group-focus-within:text-primary transition-colors duration-200"
+          className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
         >
           <span>Product Title</span>
           <span className="text-destructive">*</span>
@@ -139,10 +145,10 @@ export default function ProductForm({
               shouldShowError("title") ? "title-error" : undefined
             }
           />
-          {shouldShowError("title") ? (
+          {titleStatus === "error" ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-destructive"
+              className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-destructive"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -154,10 +160,10 @@ export default function ProductForm({
               <line x1="12" x2="12" y1="8" y2="12" />
               <line x1="12" x2="12.01" y1="16" y2="16" />
             </svg>
-          ) : formData.title && formData.title.trim().length >= 3 ? (
+          ) : titleStatus === "valid" ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 absolute right-3 top-1/2 -translate-y-1/2 text-green-500"
+              className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-green-500"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -172,11 +178,11 @@ export default function ProductForm({
         {shouldShowError("title") && (
           <p
             id="title-error"
-            className="mt-1.5 text-xs text-destructive flex items-center gap-1"
+            className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-3 w-3"
+              className="size-3"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -196,9 +202,9 @@ export default function ProductForm({
       <div className="group">
         <label
           htmlFor="category"
-          className="flex mb-2 text-sm font-medium text-foreground group-focus-within:text-primary transition-colors duration-200"
+          className="mb-2 flex text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
         >
-          Category <span className="text-destructive ml-1">*</span>
+          Category <span className="ml-1 text-destructive">*</span>
         </label>
         <div className="relative">
           <select
@@ -224,9 +230,9 @@ export default function ProductForm({
               </option>
             ))}
           </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
             <svg
-              className={`w-4 h-4 transition-colors duration-200 ${
+              className={`size-4 transition-colors duration-200 ${
                 shouldShowError("category")
                   ? "text-destructive"
                   : focused === "category"
@@ -251,11 +257,11 @@ export default function ProductForm({
         {shouldShowError("category") && (
           <p
             id="category-error"
-            className="mt-1.5 text-xs text-destructive flex items-center gap-1"
+            className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-3 w-3"
+              className="size-3"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -275,12 +281,12 @@ export default function ProductForm({
       <div className="group">
         <label
           htmlFor="tags"
-          className="flex mb-2 text-sm font-medium text-foreground group-focus-within:text-primary transition-colors duration-200"
+          className="mb-2 flex text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
         >
           Tags
           {formData.tags && (
             <span className="ml-auto text-xs text-muted-foreground">
-              {formData.tags.split(",").filter((t) => t.trim()).length} tags
+              {parsedTags.length} tags
             </span>
           )}
         </label>
@@ -306,11 +312,10 @@ export default function ProductForm({
           {formData.tags && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
               <div
-                className={`h-2 w-2 rounded-full ${
+                className={`size-2 rounded-full ${
                   shouldShowError("tags")
                     ? "bg-destructive"
-                    : formData.tags.split(",").filter((t) => t.trim()).length >
-                      0
+                    : parsedTags.length > 0
                     ? "bg-green-500"
                     : "bg-muted"
                 }`}
@@ -321,11 +326,11 @@ export default function ProductForm({
         {shouldShowError("tags") ? (
           <p
             id="tags-error"
-            className="mt-1.5 text-xs text-destructive flex items-center gap-1"
+            className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-3 w-3"
+              className="size-3"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -343,7 +348,7 @@ export default function ProductForm({
           <div className="mt-1.5 flex items-start gap-1.5">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-3.5 w-3.5 text-muted-foreground mt-0.5"
+              className="mt-0.5 size-3.5 text-muted-foreground"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -353,29 +358,25 @@ export default function ProductForm({
             >
               <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
             </svg>
-            <p className="text-xs text-muted-foreground flex-1">
+            <p className="flex-1 text-xs text-muted-foreground">
               Add descriptive tags separated by commas to help categorize your
               product. Good tags improve searchability.
             </p>
           </div>
         )}
 
-        {formData.tags &&
-          formData.tags.split(",").filter((t) => t.trim()).length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
-              {formData.tags
-                .split(",")
-                .filter((t) => t.trim())
-                .map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary text-xs rounded-md"
-                  >
-                    #{tag.trim()}
-                  </span>
-                ))}
-            </div>
-          )}
+        {parsedTags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {parsedTags.map((tag, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs text-primary"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

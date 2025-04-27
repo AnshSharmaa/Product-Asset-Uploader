@@ -6,28 +6,17 @@ import ProductForm from "@/components/ProductForm";
 import ImageUploader from "@/components/ImageUploader";
 import Toast from "@/components/Toast";
 
-interface FormData {
-  title: string;
-  category: string;
-  tags: string;
-}
-
-interface ToastData {
-  message: string;
-  isError: boolean;
-  isOpen: boolean;
-}
-
 export default function Home() {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ProductFormData>({
     title: "",
-    category: "",
+    category: "" as ProductCategory,
     tags: "",
   });
   const [toastData, setToastData] = useState<ToastData>({
     message: "",
     isError: false,
     isOpen: false,
+    duration: 2000,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -51,10 +40,15 @@ export default function Home() {
   };
 
   const handleToast = (data: { message: string; isError: boolean }) => {
-    setToastData({ ...data, isOpen: true });
+    setToastData({ ...data, isOpen: true, duration: toastData.duration });
     setTimeout(() => {
-      setToastData({ message: "", isError: false, isOpen: false });
-    }, 3000);
+      setToastData({
+        message: "",
+        isError: false,
+        isOpen: false,
+        duration: toastData.duration,
+      });
+    }, toastData.duration);
   };
 
   const handleImageError = (message: string) => {
@@ -63,9 +57,12 @@ export default function Home() {
 
   // Global reset function
   const handleClearAll = () => {
-    setFormData({ title: "", category: "", tags: "" });
+    setFormData({
+      title: "",
+      category: "" as ProductCategory,
+      tags: "",
+    });
     setImages([]);
-    // handleToast({ message: "Form cleared successfully", isError: false });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -84,7 +81,7 @@ export default function Home() {
         isError: true,
       });
       return;
-    } 
+    }
 
     setIsSubmitting(true);
     console.log("Product Info:", formData);
@@ -102,7 +99,11 @@ export default function Home() {
         setIsSuccess(false);
         setIsSubmitting(false);
 
-        setFormData({ title: "", category: "", tags: "" });
+        setFormData({
+          title: "",
+          category: "" as ProductCategory,
+          tags: "",
+        });
         setImages([]);
       }, 2000);
 
@@ -111,24 +112,30 @@ export default function Home() {
   }, [isSuccess]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-background/80 p-4 md:p-8 lg:p-12 bg-blue-500">
+    <main className="min-h-screen  bg-gradient-to-b from-background to-blue-200 p-4 md:p-8 lg:p-12 ">
       <Toast
         message={toastData.message}
         isError={toastData.isError}
         isOpen={toastData.isOpen}
         onClose={() =>
-          setToastData({ message: "", isError: false, isOpen: false })
+          setToastData({
+            message: "",
+            isError: false,
+            isOpen: false,
+            duration: toastData.duration,
+          })
         }
+        duration={toastData.duration}
       />
       <div className="container mx-auto max-w-7xl ">
-        <div className="bg-card/80 backdrop-blur-sm text-card-foreground rounded-xl shadow-xl border border-border/50 p-6 md:p-8  relative  bg-secondary/50">
+        <div className="relative overflow-hidden rounded-xl border border-border/50 p-6 text-card-foreground shadow-xl backdrop-blur-sm md:p-8">
           {/* Header with decorative elements */}
 
-          <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
+          <div className="relative z-10 mb-8">
+            <h1 className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-center text-2xl font-bold text-transparent md:text-3xl">
               Product Asset Uploader
             </h1>
-            <p className="text-center text-muted-foreground mt-2 max-w-xl mx-auto">
+            <p className="mx-auto mt-2 max-w-xl text-center text-muted-foreground">
               Upload your product information and images to showcase your items
               in the best possible way.
             </p>
@@ -136,13 +143,13 @@ export default function Home() {
 
           <form
             onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative z-10"
+            className="relative z-10 grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12"
           >
             {isSubmitting && (
-              <div className="absolute top-0 left-0 w-full h-full bg-black/20 backdrop-blur-sm z-20 flex justify-center items-center rounded-lg">
-                <div className="bg-card p-6 rounded-xl shadow-lg flex flex-col items-center gap-4">
-                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-foreground font-medium">
+              <div className="absolute left-0 top-0 z-20 flex size-full items-center justify-center rounded-lg bg-black/20 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-4 rounded-xl bg-card p-6 shadow-lg">
+                  <div className="size-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                  <p className="font-medium text-foreground">
                     {isSuccess ? "Success!" : "Uploading product..."}
                   </p>
                 </div>
@@ -151,7 +158,7 @@ export default function Home() {
 
             <div className="flex flex-col space-y-6">
               <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
+                <div className="rounded-lg bg-primary/10 p-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -171,7 +178,7 @@ export default function Home() {
                   Product Information
                 </h2>
               </div>
-              <div className="p-4 bg-card rounded-xl border border-border/50 shadow-lg">
+              <div className="rounded-xl border border-border/50 bg-card p-4 shadow-lg">
                 <ProductForm
                   formData={formData}
                   onFormChange={handleFormChange}
@@ -183,7 +190,7 @@ export default function Home() {
             {/* Image Uploader Section */}
             <div className="flex flex-col space-y-6">
               <div className="flex items-center space-x-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
+                <div className="rounded-lg bg-primary/10 p-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -202,14 +209,14 @@ export default function Home() {
                   </svg>
                 </div>
                 <h2 className="text-xl font-semibold text-foreground">
-                  Product Images{" "}
+                  Product Images
                   <span className="text-sm font-normal">
                     <span className="text-destructive">*</span> (At least 1 and
                     maximum 3)
                   </span>
                 </h2>
               </div>
-              <div className="p-4 bg-card rounded-xl border border-border/50 shadow-lg">
+              <div className="rounded-xl border border-border/50 bg-card p-4 shadow-lg">
                 <ImageUploader
                   images={images}
                   onImagesChange={handleImagesChange}
@@ -220,18 +227,18 @@ export default function Home() {
             </div>
 
             {/* Form Actions - Spans across columns on mobile, stays in form col on desktop */}
-            <div className="md:col-span-2 flex justify-center gap-4 mt-8">
+            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row md:col-span-2">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-4 focus:ring-primary/20 focus:outline-none font-medium rounded-lg text-sm px-8 py-3 text-center transition-all duration-200 ease-in-out shadow-md hover:shadow-lg disabled:shadow-none disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full rounded-lg bg-primary px-8 py-3 text-center text-sm font-medium text-primary-foreground shadow-md transition-all duration-200 ease-in-out hover:bg-primary/90 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-70 disabled:shadow-none md:w-auto"
               >
                 {isSubmitting ? "Submitting..." : "Submit Product"}
               </button>
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="w-full md:w-auto bg-destructive/10 text-destructive hover:bg-destructive/20 focus:ring-4 focus:ring-destructive/20 focus:outline-none font-medium rounded-lg text-sm px-8 py-3 text-center transition-all duration-200 ease-in-out"
+                className="w-full rounded-lg bg-destructive/20 px-8 py-3 text-center text-sm font-medium text-destructive transition-all duration-200 ease-in-out hover:bg-destructive/20 focus:outline-none focus:ring-4 focus:ring-destructive/20 md:w-auto"
               >
                 Clear All
               </button>
