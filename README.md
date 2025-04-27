@@ -48,7 +48,7 @@
 
 ## Amount of hours it took you to complete the challenge
 
-- Approximately 8.5 hours to complete.
+- Approximately 7.5 hours to complete.
 
 ## AI tools 
 Firebase Studio:
