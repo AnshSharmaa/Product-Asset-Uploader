@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import Image from 'next/image';
+import { useState, useCallback, useRef, useEffect } from "react";
+import Image from "next/image";
 
 interface ImageUploaderProps {
-  images: File[]
-  onImagesChange: (images: File[]) => void
-  maxImages: number
-  onImageError: (message: string) => void
+  images: File[];
+  onImagesChange: (images: File[]) => void;
+  maxImages: number;
+  onImageError: (message: string) => void;
 }
 
 export default function ImageUploader({
@@ -19,13 +19,15 @@ export default function ImageUploader({
   const [previews, setPreviews] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Handle file validation
   const validateFiles = (files: File[]): File[] => {
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    return files.filter(file => {
+    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+    return files.filter((file) => {
       if (!validTypes.includes(file.type)) {
-        onImageError(`Invalid file type: ${file.name}. Only JPG, PNG, and GIF are allowed.`);
+        onImageError(
+          `Invalid file type: ${file.name}. Only JPG, PNG, and GIF are allowed.`
+        );
         return false;
       }
       return true;
@@ -39,29 +41,28 @@ export default function ImageUploader({
         setIsLoading(true);
         const newFiles = Array.from(files);
         const validFiles = validateFiles(newFiles);
-        
+
         if (validFiles.length === 0) {
           setIsLoading(false);
           return;
         }
-        
+
         const totalImages = images.length + validFiles.length;
-        
         if (totalImages > maxImages) {
           onImageError(`You can only upload a maximum of ${maxImages} images.`);
           setIsLoading(false);
           if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+            fileInputRef.current.value = "";
           }
           return;
         }
 
         // Update files state with valid files
         onImagesChange([...images, ...validFiles]);
-        
+
         // Clear the input after processing files
         if (fileInputRef.current) {
-          fileInputRef.current.value = '';
+          fileInputRef.current.value = "";
         }
       }
     },
@@ -70,7 +71,9 @@ export default function ImageUploader({
 
   const handleRemoveImage = useCallback(
     (indexToRemove: number) => {
-      const updatedImages = images.filter((_, index) => index !== indexToRemove);
+      const updatedImages = images.filter(
+        (_, index) => index !== indexToRemove
+      );
       onImagesChange(updatedImages);
     },
     [images, onImagesChange]
@@ -91,64 +94,139 @@ export default function ImageUploader({
   useEffect(() => {
     // Revoke old URL objects to prevent memory leaks
     previews.forEach(URL.revokeObjectURL);
-    
+
     // Create new URL objects for the current images
     const urls = images.map((file) => URL.createObjectURL(file));
     setPreviews(urls);
-    
+
     // Cleanup function to revoke URLs when component unmounts or images change
     return () => urls.forEach(URL.revokeObjectURL);
   }, [images]);
 
+  // Get upload zone styles based on state
+  const getUploadZoneClasses = () => {
+    if (images.length >= maxImages) {
+      return "border-muted-foreground/40 bg-muted/20 cursor-not-allowed";
+    }
+    return "border-border hover:border-primary/50 hover:bg-primary/5 border-dashed cursor-pointer";
+  };
+
   return (
     <div className="flex flex-col space-y-4">
       <div
-        className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg transition-colors duration-200 ease-in-out ${
-          images.length >= maxImages 
-            ? 'border-muted-foreground bg-muted/30 cursor-not-allowed' 
-            : 'border-input hover:border-primary hover:bg-secondary/50 bg-card cursor-pointer'
-        }`}
-        onClick={() => images.length < maxImages && fileInputRef.current?.click()}
+        className={`flex flex-col items-center justify-center w-full h-52 border-2 rounded-xl transition-all duration-200 ease-in-out ${getUploadZoneClasses()}`}
+        onClick={() =>
+          images.length < maxImages && fileInputRef.current?.click()
+        }
         role="button"
         aria-label="Upload image"
         aria-disabled={images.length >= maxImages}
         tabIndex={images.length >= maxImages ? -1 : 0}
-        onKeyDown={(e) => { 
-          if((e.key === 'Enter' || e.key === ' ') && images.length < maxImages) {
+        onKeyDown={(e) => {
+          if (
+            (e.key === "Enter" || e.key === " ") &&
+            images.length < maxImages
+          ) {
             fileInputRef.current?.click();
           }
         }}
       >
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-2"></div>
-            <p className="text-sm text-muted-foreground">Processing images...</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+          <div className="flex flex-col items-center justify-center animate-pulse">
             <svg
-              className={`w-8 h-8 mb-4 ${images.length >= maxImages ? 'text-muted-foreground' : 'text-primary'}`}
+              className="w-10 h-10 mb-3 text-primary"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
-              viewBox="0 0 20 16"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
               <path
-                stroke="currentColor"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
               />
             </svg>
-            <p className={`mb-2 text-sm ${images.length >= maxImages ? 'text-muted-foreground' : 'text-foreground'}`}>
-              <span className="font-semibold">Click to upload</span>
+            <p className="text-sm text-muted-foreground">
+              Processing images...
             </p>
-            <p className={`text-xs ${images.length >= maxImages ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
-               PNG, JPG, GIF up to 10MB
-            </p>
-            {images.length >= maxImages && (
-              <p className="text-xs text-destructive mt-2">Maximum images reached</p>
+            <div className="mt-3 w-24 h-1 bg-muted-foreground/20 rounded-full overflow-hidden">
+              <div className="h-full bg-primary rounded-full animate-progress-indeterminate"></div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-5 px-4 text-center">
+            <div
+              className={`p-3 mb-2 rounded-full ${
+                images.length >= maxImages ? "bg-muted" : "bg-primary/10"
+              }`}
+            >
+              <svg
+                className={`w-7 h-7 ${
+                  images.length >= maxImages
+                    ? "text-muted-foreground"
+                    : "text-primary"
+                }`}
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+            </div>
+
+            {images.length >= maxImages ? (
+              <p className="mb-1 text-md font-semibold text-foreground">
+                {" "}
+                Maximum images reached{" "}
+              </p>
+            ) : (
+              <div>
+                <p className="mb-1 text-sm font-medium text-muted-foreground">
+                  <span>
+                    Drag and drop or{" "}
+                    <span className="text-primary underline underline-offset-2 decoration-primary/30">
+                      Click here to upload
+                    </span>
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground max-w-[20rem]">
+                  Upload high-resolution product images for best experience
+                  (PNG, JPG, GIF)
+                </p>
+              </div>
+            )}
+
+            {images.length > 0 && (
+              <div className="flex items-center gap-1 mt-3">
+                <div className="flex -space-x-2">
+                  {previews.slice(0, 3).map((src, index) => (
+                    <div
+                      key={`mini-${index}`}
+                      className="w-6 h-6 rounded-full border border-border overflow-hidden ring-1 ring-background"
+                    >
+                      <Image
+                        src={src}
+                        alt={`Thumbnail ${index + 1}`}
+                        width={24}
+                        height={24}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {images.length} of {maxImages} uploaded
+                </span>
+              </div>
             )}
           </div>
         )}
@@ -165,38 +243,65 @@ export default function ImageUploader({
         />
       </div>
 
-      {/* Image Count */}
+      {/* Image Actions */}
       {images.length > 0 && (
         <div className="flex justify-between items-center">
-          <p className="text-xs text-muted-foreground">
-            {images.length} of {maxImages} images uploaded
-          </p>
+          <div className="flex items-center gap-1.5">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                images.length === maxImages ? "bg-amber-500" : "bg-green-500"
+              }`}
+            ></div>
+            <p className="text-xs text-muted-foreground">
+              {images.length === maxImages
+                ? "Maximum limit reached"
+                : `${images.length} of ${maxImages} images uploaded`}
+            </p>
+          </div>
           <button
             type="button"
             onClick={handleClearAllImages}
-            className="text-xs px-2 py-1 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            className="text-xs px-2.5 py-1.5 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-destructive/40 flex items-center gap-1"
             aria-label="Clear all images"
           >
-            Clear all
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3 w-3"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 6h18" />
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+            Clear all Images
           </button>
         </div>
       )}
 
       {/* Image Previews */}
-      {previews.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
+      {
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {previews.map((src, index) => (
-            <div key={`preview-${index}`} className="relative group aspect-square">
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-50 animate-pulse rounded-lg">
-                <span className="sr-only">Loading image preview</span>
-              </div>
+            <div
+              key={`preview-${index}`}
+              className="relative group aspect-square rounded-lg overflow-hidden border border-border bg-card/50 transition-all duration-200 hover:shadow-md"
+            >
               <Image
                 src={src}
                 alt={`Preview ${index + 1}`}
-                width={150}
-                height={150}
-                className="object-cover w-full h-full rounded-lg shadow-md border border-border relative z-10"
-                onError={() => console.error(`Error loading preview ${index + 1}`)}
+                width={200}
+                height={200}
+                className="object-cover w-full h-full rounded-lg relative z-10 transition-transform group-hover:scale-[1.02]"
+                onError={() =>
+                  console.error(`Error loading preview ${index + 1}`)
+                }
               />
               <button
                 type="button"
@@ -204,7 +309,7 @@ export default function ImageUploader({
                   e.stopPropagation();
                   handleRemoveImage(index);
                 }}
-                className="absolute top-1 right-1 bg-destructive/80 text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out hover:bg-destructive focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 z-20"
+                className="absolute top-1 right-1 bg-destructive/80 text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out hover:bg-destructive focus:outline-none focus:ring-2 focus:ring-destructive/10  z-20"
                 aria-label={`Remove image ${index + 1}`}
               >
                 <svg
@@ -220,11 +325,13 @@ export default function ImageUploader({
                   />
                 </svg>
               </button>
+              <div className="absolute bottom-2 left-2 z-20 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                Image {index + 1}
+              </div>
             </div>
           ))}
         </div>
-      )}
+      }
     </div>
   );
 }
-
