@@ -12,7 +12,9 @@ export default function ImageUploader({
 }: ImageUploaderProps) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const processFiles = useCallback((files: File[]) => {
     setIsLoading(true);
@@ -67,6 +69,42 @@ export default function ImageUploader({
     [processFiles]
   );
 
+  // Drag and drop handlers
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check if the leave event is for the container and not for a child element
+    if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    // Don't allow drops if max images reached
+    if (images.length >= maxImages) {
+      return;
+    }
+    
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    processFiles(droppedFiles);
+  }, [images.length, maxImages, processFiles]);
+
   const handleRemoveImage = useCallback(
     (indexToRemove: number) => {
       const updatedImages = [...images];
@@ -105,16 +143,24 @@ export default function ImageUploader({
     if (images.length >= maxImages) {
       return "border-muted-foreground/40 bg-muted/20 cursor-not-allowed";
     }
+    if (isDragging) {
+      return "border-primary border-solid bg-primary/10 border-2";
+    }
     return "border-border hover:border-primary/50 hover:bg-primary/5 border-dashed cursor-pointer";
   };
 
   return (
     <div className="flex flex-col space-y-4">
       <div
+        ref={dropZoneRef}
         className={`flex h-52 w-full flex-col items-center justify-center rounded-xl border-2 transition-all duration-200 ease-in-out ${getUploadZoneClasses()}`}
         onClick={() =>
           images.length < maxImages && fileInputRef.current?.click()
         }
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         role="button"
         aria-label="Upload image"
         aria-disabled={images.length >= maxImages}
@@ -188,10 +234,16 @@ export default function ImageUploader({
               <div>
                 <p className="mb-1 text-sm font-medium text-muted-foreground">
                   <span>
-                    Drag and drop or{" "}
-                    <span className="text-primary underline decoration-primary/30 underline-offset-2">
-                      Click here to upload
-                    </span>
+                    {isDragging ? (
+                      <span className="text-primary font-medium">Drop your images here</span>
+                    ) : (
+                      <span>
+                        Drag and drop or{" "}
+                        <span className="text-primary underline decoration-primary/30 underline-offset-2">
+                          Click here to upload
+                        </span>
+                      </span>
+                    )}
                   </span>
                 </p>
                 <p className="max-w-80 text-xs text-muted-foreground">
