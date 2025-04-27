@@ -18,7 +18,10 @@ const ACCEPTED_FILE_TYPES = SUPPORTED_IMAGE_TYPES.join(", ");
 /**
  * Custom hook to handle drag and drop functionality
  */
-const useDragAndDrop = (onDrop: (files: File[]) => void, isDisabled = false) => {
+const useDragAndDrop = (
+  onDrop: (files: File[]) => void,
+  isDisabled = false
+) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
@@ -27,13 +30,16 @@ const useDragAndDrop = (onDrop: (files: File[]) => void, isDisabled = false) => 
     e.stopPropagation();
   }, []);
 
-  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isDisabled) {
-      setIsDragging(true);
-    }
-  }, [isDisabled]);
+  const handleDragEnter = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isDisabled) {
+        setIsDragging(true);
+      }
+    },
+    [isDisabled]
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -70,7 +76,7 @@ const useDragAndDrop = (onDrop: (files: File[]) => void, isDisabled = false) => 
     handleDragOver,
     handleDragEnter,
     handleDragLeave,
-    handleDrop
+    handleDrop,
   };
 };
 
@@ -90,7 +96,9 @@ export default function ImageUploader({
 
       const validateFiles = (files: File[]): File[] => {
         return files.filter((file) => {
-          if (!SUPPORTED_IMAGE_TYPES.includes(file.type as SupportedImageType)) {
+          if (
+            !SUPPORTED_IMAGE_TYPES.includes(file.type as SupportedImageType)
+          ) {
             onImageError(
               `Invalid file type: ${file.name}. Only JPG, PNG, and GIF are allowed.`
             );
@@ -127,7 +135,7 @@ export default function ImageUploader({
     handleDragOver,
     handleDragEnter,
     handleDragLeave,
-    handleDrop
+    handleDrop,
   } = useDragAndDrop(processFiles, images.length >= maxImages);
 
   const handleFileChange = useCallback(
@@ -193,7 +201,7 @@ export default function ImageUploader({
     <div className="flex flex-col space-y-6">
       <div className="flex items-center space-x-2">
         <div className="rounded-lg bg-primary/10 p-2">
-          <ImageIcon className="text-primary size-5" />
+          <ImageIcon className="size-5 text-primary" />
         </div>
         <h2 className="text-xl font-semibold text-foreground">
           Product Images
@@ -263,7 +271,7 @@ export default function ImageUploader({
                     <p className="mb-1 text-sm font-medium text-muted-foreground">
                       <span>
                         {isDragging ? (
-                          <span className="text-primary font-medium">
+                          <span className="font-medium text-primary">
                             Drop your images here
                           </span>
                         ) : (
@@ -357,7 +365,7 @@ export default function ImageUploader({
                       alt={`Product image ${index + 1}`}
                       width={200}
                       height={200}
-                      className="relative z-10 size-full rounded-lg object-cover transition-transform group-hover:scale-[1.05]"
+                      className="relative z-10 size-full rounded-lg object-cover transition-transform group-hover:scale-105"
                       onError={() =>
                         onImageError(`Error loading preview ${index + 1}`)
                       }

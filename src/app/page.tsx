@@ -182,7 +182,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="w-full rounded-lg bg-destructive/20 px-8 py-3 text-center text-sm font-medium text-destructive transition-all duration-200 ease-in-out hover:bg-destructive/20 focus:outline-none focus:ring-4 focus:ring-destructive/20 md:w-auto"
+                className="w-full rounded-lg bg-destructive/20 px-8 py-3 text-center text-sm font-medium  transition-all duration-200 ease-in-out hover:bg-destructive/20 focus:outline-none focus:ring-4 focus:ring-destructive/20 md:w-auto"
               >
                 Clear All
               </button>

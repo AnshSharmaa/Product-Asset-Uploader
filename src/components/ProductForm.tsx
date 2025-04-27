@@ -27,7 +27,8 @@ const categories: ProductCategory[] = [
  * Custom hook to manage form field focus and touched states
  */
 const useFormFieldState = (initialFields: Record<FormField, boolean>) => {
-  const [touched, setTouched] = useState<Record<FormField, boolean>>(initialFields);
+  const [touched, setTouched] =
+    useState<Record<FormField, boolean>>(initialFields);
   const [focused, setFocused] = useState<FormField | null>(null);
 
   const handleFocus = useCallback((field: FormField): void => {
@@ -57,27 +58,27 @@ const useFormFieldState = (initialFields: Record<FormField, boolean>) => {
   };
 };
 
- const ProductForm = ({
+const ProductForm = ({
   formData,
   onFormChange,
   onTagsChange,
-}: ProductFormProps)=> {
+}: ProductFormProps) => {
   const [errors, setErrors] = useState<ValidationErrors>({});
-  
+
   const initialTouchState: Record<FormField, boolean> = {
     title: false,
     category: false,
     tags: false,
     images: false,
   };
-  
+
   const {
     touched,
     focused,
     handleFocus,
     handleBlur,
     resetTouched,
-    markFieldAsTouched
+    markFieldAsTouched,
   } = useFormFieldState(initialTouchState);
 
   // Reset touched state when formData is reset (empty title indicates form reset)
@@ -161,7 +162,7 @@ const useFormFieldState = (initialFields: Record<FormField, boolean>) => {
     <div className="flex flex-col space-y-6">
       <div className="flex items-center space-x-2">
         <div className="rounded-lg bg-primary/10 p-2">
-          <ClipIcon className="text-primary size-5" />
+          <ClipIcon className="size-5 text-primary" />
         </div>
         <h2 className="text-xl font-semibold text-foreground">
           Product Information
@@ -317,6 +318,6 @@ const useFormFieldState = (initialFields: Record<FormField, boolean>) => {
       </div>
     </div>
   );
-}
+};
 
 export default ProductForm;
