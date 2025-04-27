@@ -26,7 +26,9 @@ const Toast: React.FC<ToastProps> = ({
   return (
     <div
       className={cn(
-        "fixed bottom-4 right-4 z-50 max-w-sm w-full shadow-lg flex items-center gap-3 p-4 rounded-lg backdrop-blur-sm transition-all duration-300 transform",
+        "fixed right-4 z-50 max-w-sm w-full shadow-lg flex items-center gap-3 p-4 rounded-lg backdrop-blur-sm transition-all duration-300 transform",
+        /* Position at top on mobile, bottom on larger screens */
+        "top-4 sm:top-auto sm:bottom-4",
         variant === "error"
           ? "bg-destructive/90 text-destructive-foreground border border-destructive/20"
           : "bg-primary/90 text-primary-foreground border border-primary/20"
