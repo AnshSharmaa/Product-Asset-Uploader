@@ -1,13 +1,5 @@
 # Product Asset Uploader
 
-## Features
-
-- Modern UI with responsive design
-- Form validation for product information
-- Dynamic image uploading with preview
-- Toast notifications for user feedback
-- TypeScript for type safety
-
 ## How to Run the Project
 
 1. **Clone the repository**
@@ -66,7 +58,5 @@ Cursor AI (Model: Claude 3.7 Sonnet):
 ### **Overall Impact:** 
 AI tools enabled rapid development, quick error resolution, and contributed to a more polished UI than initially envisioned, requiring only minor manual adjustments. Reducing the development time by 80%
 
-
-
-
-
+## Demo Link
+- https://product-asset-uploader.vercel.app/

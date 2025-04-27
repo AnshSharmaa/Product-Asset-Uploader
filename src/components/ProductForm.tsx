@@ -1,16 +1,17 @@
 "use client";
 import { useState, useEffect } from "react";
-import { 
-  ProductCategory, 
-  ProductFormProps, 
-  ValidationErrors, 
-  FormField 
+import {
+  ProductCategory,
+  ProductFormProps,
+  ValidationErrors,
+  FormField,
 } from "@/types/index";
-import { 
-  AlertIcon, 
-  CheckIcon, 
-  ArrowRightIcon, 
-  ChevronDownIcon 
+import {
+  AlertIcon,
+  CheckIcon,
+  ArrowRightIcon,
+  ChevronDownIcon,
+  ClipIcon,
 } from "./icons";
 
 const categories: ProductCategory[] = [
@@ -125,146 +126,161 @@ export default function ProductForm({
   const parsedTags = formData.tags ? parseTagsFromString(formData.tags) : [];
 
   return (
-    <div className="space-y-5">
-      <div className="group">
-        <label
-          htmlFor="title"
-          className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
-        >
-          <span>Product Title
-          <span className="text-destructive">* </span>
-          <span className="text-xs">(At least 3 characters)</span>
-          </span>
-          {formData.title && (
-            <span className="ml-auto text-xs text-muted-foreground">
-              {formData.title.length} characters
-            </span>
-          )}
-        </label>
-        <div className="relative">
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            onFocus={() => handleFocus("title")}
-            onBlur={() => handleBlur("title")}
-            required
-            className={getInputClasses("title")}
-            placeholder="e.g., Cool Graphic Tee"
-            aria-invalid={!!shouldShowError("title")}
-            aria-describedby={
-              shouldShowError("title") ? "title-error" : undefined
-            }
-          />
-          {titleStatus === "error" ? (
-            <AlertIcon className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-destructive" />
-          ) : titleStatus === "valid" ? (
-            <CheckIcon className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-green-500" />
-          ) : null}
+    <div className="flex flex-col space-y-6">
+      <div className="flex items-center space-x-2">
+        <div className="rounded-lg bg-primary/10 p-2">
+          <ClipIcon className="text-primary size-5" />
         </div>
-        {shouldShowError("title") && (
-          <p
-            id="title-error"
-            className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
-          >
-            <ArrowRightIcon className="size-3" />
-            {errors.title}
-          </p>
-        )}
+        <h2 className="text-xl font-semibold text-foreground">
+          Product Information
+        </h2>
       </div>
-
-      <div className="group">
-        <label
-          htmlFor="category"
-          className="mb-2 flex text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
-        >
-          Category <span className="ml-1 text-destructive">*</span>
-        </label>
-        <div className="relative">
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            onFocus={() => handleFocus("category")}
-            onBlur={() => handleBlur("category")}
-            required
-            className={`${getInputClasses("category")} appearance-none pr-10`}
-            aria-invalid={!!shouldShowError("category")}
-            aria-describedby={
-              shouldShowError("category") ? "category-error" : undefined
-            }
-          >
-            <option value="" disabled>
-              Select a category
-            </option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <ChevronDownIcon
-              className={`size-4 transition-colors duration-200 ${
-                shouldShowError("category")
-                  ? "text-destructive"
-                  : focused === "category"
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
-            />
-          </div>
-        </div>
-        {shouldShowError("category") && (
-          <p
-            id="category-error"
-            className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
-          >
-            <ArrowRightIcon className="size-3" />
-            {errors.category}
-          </p>
-        )}
-      </div>
-
-      <div className="group">
-        <label
-          htmlFor="tags"
-          className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
-        >
-          <span>Tags (comma separated, optional)</span>
-          {parsedTags.length > 0 && (
-            <span className="ml-auto text-xs text-muted-foreground">
-              {parsedTags.length} tag{parsedTags.length !== 1 ? "s" : ""}
-            </span>
-          )}
-        </label>
-        <input
-          type="text"
-          id="tags"
-          name="tags"
-          value={formData.tags}
-          onChange={(e) => {
-            handleChange(e);
-            onTagsChange(e);
-          }}
-          onFocus={() => handleFocus("tags")}
-          onBlur={() => handleBlur("tags")}
-          className={getInputClasses("tags")}
-          placeholder="e.g., summer, beach, vacation"
-        />
-
-        <div className="mt-2 flex flex-wrap gap-1">
-          {parsedTags.map((tag, index) => (
-            <span
-              key={`${tag}-${index}`}
-              className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+      <div className="rounded-xl border border-border/50 bg-card p-4 shadow-lg">
+        <div className="space-y-5">
+          <div className="group">
+            <label
+              htmlFor="title"
+              className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
             >
-              #{tag}
-            </span>
-          ))}
+              <span>
+                Product Title
+                <span className="text-destructive">* </span>
+                <span className="text-xs">(At least 3 characters)</span>
+              </span>
+              {formData.title && (
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {formData.title.length} characters
+                </span>
+              )}
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                onFocus={() => handleFocus("title")}
+                onBlur={() => handleBlur("title")}
+                required
+                className={getInputClasses("title")}
+                placeholder="e.g., Cool Graphic Tee"
+                aria-invalid={!!shouldShowError("title")}
+                aria-describedby={
+                  shouldShowError("title") ? "title-error" : undefined
+                }
+              />
+              {titleStatus === "error" ? (
+                <AlertIcon className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-destructive" />
+              ) : titleStatus === "valid" ? (
+                <CheckIcon className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-green-500" />
+              ) : null}
+            </div>
+            {shouldShowError("title") && (
+              <p
+                id="title-error"
+                className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
+              >
+                <ArrowRightIcon className="size-3" />
+                {errors.title}
+              </p>
+            )}
+          </div>
+
+          <div className="group">
+            <label
+              htmlFor="category"
+              className="mb-2 flex text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
+            >
+              Category <span className="ml-1 text-destructive">*</span>
+            </label>
+            <div className="relative">
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                onFocus={() => handleFocus("category")}
+                onBlur={() => handleBlur("category")}
+                required
+                className={`${getInputClasses(
+                  "category"
+                )} appearance-none pr-10`}
+                aria-invalid={!!shouldShowError("category")}
+                aria-describedby={
+                  shouldShowError("category") ? "category-error" : undefined
+                }
+              >
+                <option value="" disabled>
+                  Select a category
+                </option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <ChevronDownIcon
+                  className={`size-4 transition-colors duration-200 ${
+                    shouldShowError("category")
+                      ? "text-destructive"
+                      : focused === "category"
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
+                />
+              </div>
+            </div>
+            {shouldShowError("category") && (
+              <p
+                id="category-error"
+                className="mt-1.5 flex items-center gap-1 text-xs text-destructive"
+              >
+                <ArrowRightIcon className="size-3" />
+                {errors.category}
+              </p>
+            )}
+          </div>
+
+          <div className="group">
+            <label
+              htmlFor="tags"
+              className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
+            >
+              <span>Tags (comma separated, optional)</span>
+              {parsedTags.length > 0 && (
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {parsedTags.length} tag{parsedTags.length !== 1 ? "s" : ""}
+                </span>
+              )}
+            </label>
+            <input
+              type="text"
+              id="tags"
+              name="tags"
+              value={formData.tags}
+              onChange={(e) => {
+                handleChange(e);
+                onTagsChange(e);
+              }}
+              onFocus={() => handleFocus("tags")}
+              onBlur={() => handleBlur("tags")}
+              className={getInputClasses("tags")}
+              placeholder="e.g., summer, beach, vacation"
+            />
+
+            <div className="mt-2 flex flex-wrap gap-1">
+              {parsedTags.map((tag, index) => (
+                <span
+                  key={`${tag}-${index}`}
+                  className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -131,7 +131,11 @@ export function SuccessIcon({ className = "size-5" }: { className?: string }) {
   );
 }
 
-export function ArrowRightIcon({ className = "size-3" }: { className?: string }) {
+export function ArrowRightIcon({
+  className = "size-3",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -150,7 +154,11 @@ export function ArrowRightIcon({ className = "size-3" }: { className?: string })
   );
 }
 
-export function ChevronDownIcon({ className = "size-4" }: { className?: string }) {
+export function ChevronDownIcon({
+  className = "size-4",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       className={className}
@@ -170,7 +178,7 @@ export function ChevronDownIcon({ className = "size-4" }: { className?: string }
   );
 }
 
-export function PencilIcon({ className = "size-5" }: { className?: string }) {
+export function ClipIcon({ className = "size-5" }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -185,4 +193,4 @@ export function PencilIcon({ className = "size-5" }: { className?: string }) {
       <path d="M20.91 8.84 8.56 21.18a4.3 4.3 0 0 1-6.07-6.07L14.84 3.11a2.93 2.93 0 0 1 4.13 4.13l-12.4 12.39a1.56 1.56 0 0 1-2.2-2.2L15.89 5.92" />
     </svg>
   );
-} 
+}

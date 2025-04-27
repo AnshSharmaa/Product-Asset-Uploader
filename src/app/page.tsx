@@ -6,7 +6,6 @@ import { ProductFormData, ProductCategory, ToastData } from "@/types/index";
 import ProductForm from "@/components/ProductForm";
 import ImageUploader from "@/components/ImageUploader";
 import Toast from "@/components/Toast";
-import { PencilIcon, ImageIcon } from "@/components/icons";
 
 export default function Home() {
   const [formData, setFormData] = useState<ProductFormData>({
@@ -131,7 +130,7 @@ export default function Home() {
       />
       <div className="container mx-auto max-w-8xl">
         <div className="relative overflow-hidden rounded-xl border border-border/50 p-6 text-card-foreground shadow-md backdrop-blur-sm md:p-8">
-           <div className="relative z-10 mb-8">
+          <div className="relative z-10 mb-8">
             <h1 className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-center text-2xl font-bold text-transparent md:text-3xl">
               Product Asset Uploader
             </h1>
@@ -156,49 +155,22 @@ export default function Home() {
               </div>
             )}
 
-            <div className="flex flex-col space-y-6">
-              <div className="flex items-center space-x-2">
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <PencilIcon className="text-primary size-5" />
-                </div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Product Information
-                </h2>
-              </div>
-              <div className="rounded-xl border border-border/50 bg-card p-4 shadow-lg">
-                <ProductForm
-                  formData={formData}
-                  onFormChange={handleFormChange}
-                  onTagsChange={handleTagsChange}
-                />
-              </div>
-            </div>
+            {/* Product Information Section */}
+            <ProductForm
+              formData={formData}
+              onFormChange={handleFormChange}
+              onTagsChange={handleTagsChange}
+            />
 
             {/* Image Uploader Section */}
-            <div className="flex flex-col space-y-6">
-              <div className="flex items-center space-x-2">
-                <div className="rounded-lg bg-primary/10 p-2">
-                  <ImageIcon className="text-primary size-5" />
-                </div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Product Images
-                  <span className="text-sm font-normal">
-                    <span className="text-destructive">*</span> (At least 1 and
-                    maximum 3)
-                  </span>
-                </h2>
-              </div>
-              <div className="rounded-xl border border-border/50 bg-card p-4 shadow-lg">
-                <ImageUploader
-                  images={images}
-                  onImagesChange={handleImagesChange}
-                  maxImages={MAX_IMAGES}
-                  onImageError={handleImageError}
-                />
-              </div>
-            </div>
+            <ImageUploader
+              images={images}
+              onImagesChange={handleImagesChange}
+              maxImages={MAX_IMAGES}
+              onImageError={handleImageError}
+            />
 
-            {/* Form Actions - Spans across columns on mobile, stays in form col on desktop */}
+            {/* Form Actions - Spans across columns on mobile, stays in row on desktop */}
             <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row md:col-span-2">
               <button
                 type="submit"
