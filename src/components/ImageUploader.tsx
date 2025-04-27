@@ -297,7 +297,7 @@ export default function ImageUploader({
                   alt={`Product image ${index + 1}`}
                   width={200}
                   height={200}
-                  className="relative z-10 size-full rounded-lg object-cover transition-transform group-hover:scale-[1.10]"
+                  className="relative z-10 size-full rounded-lg object-cover transition-transform group-hover:scale-[1.05]"
                   onError={() =>
                     onImageError(`Error loading preview ${index + 1}`)
                   }
