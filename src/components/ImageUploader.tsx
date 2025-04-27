@@ -288,48 +288,94 @@ export default function ImageUploader({
       {/* Image Previews */}
       {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {previews.map((src, index) => (
-            <div
-              key={`preview-${index}`}
-              className="relative group aspect-square rounded-lg overflow-hidden border border-border bg-card/50 transition-all duration-200 hover:shadow-md"
-            >
-              <Image
-                src={src}
-                alt={`Preview ${index + 1}`}
-                width={200}
-                height={200}
-                className="object-cover w-full h-full rounded-lg relative z-10 transition-transform group-hover:scale-[1.02]"
-                onError={() =>
-                  console.error(`Error loading preview ${index + 1}`)
-                }
-              />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveImage(index);
-                }}
-                className="absolute top-1 right-1 bg-destructive/80 text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out hover:bg-destructive focus:outline-none focus:ring-2 focus:ring-destructive/10  z-20"
-                aria-label={`Remove image ${index + 1}`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+          {Array.from({ length: maxImages }).map((_, index) => {
+            // If we have an image for this slot, show the actual image
+            if (index < previews.length) {
+              const src = previews[index];
+              return (
+                <div
+                  key={`preview-${index}`}
+                  className="relative group aspect-square rounded-lg overflow-hidden border border-border bg-card/50 transition-all duration-200 hover:shadow-md"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
+                  <Image
+                    src={src}
+                    alt={`Preview ${index + 1}`}
+                    width={200}
+                    height={200}
+                    className="object-cover w-full h-full rounded-lg relative z-10 transition-transform group-hover:scale-[1.10]"
+                    onError={() =>
+                      console.error(`Error loading preview ${index + 1}`)
+                    }
                   />
-                </svg>
-              </button>
-              <div className="absolute bottom-2 left-2 z-20 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                Image {index + 1}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage(index);
+                    }}
+                    className="absolute top-1 right-1 bg-destructive/80 text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out hover:bg-destructive focus:outline-none focus:ring-2 focus:ring-destructive/10 z-20"
+                    aria-label={`Remove image ${index + 1}`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <div className="absolute bottom-2 left-2 z-20 bg-black/70 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                    Image {index + 1}
+                  </div>
+                </div>
+              );
+            }
+            // Otherwise show a placeholder for this slot
+            return (
+              <div
+                key={`placeholder-${index}`}
+                className="aspect-square rounded-lg border border-dashed border-border bg-muted/20 flex flex-col items-center justify-center p-4 transition-all duration-200 hover:bg-muted/30"
+                onClick={() => images.length < maxImages && fileInputRef.current?.click()}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if ((e.key === "Enter" || e.key === " ") && images.length < maxImages) {
+                    fileInputRef.current?.click();
+                  }
+                }}
+              >
+                <div className="w-10 h-10 rounded-full bg-muted/30 flex items-center justify-center mb-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-muted-foreground"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect width="18" height="18" x="3" y="3" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  </svg>
+                </div>
+                <p className="text-xs text-center text-muted-foreground">
+                  {images.length < maxImages ? "Add image" : "Slot empty"}
+                </p>
+                {images.length < maxImages && (
+                  <p className="text-[10px] text-center text-muted-foreground/70 mt-1">
+                    Click to upload
+                  </p>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       }
     </div>
