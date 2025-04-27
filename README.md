@@ -4,7 +4,7 @@
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/AnshSharmaa/Product-Asset-Uploader.git
    cd product-asset-uploader
    ```
 
@@ -40,7 +40,7 @@
 
 ## Amount of hours it took you to complete the challenge
 
-- Approximately 8 hours to complete.
+- Approximately 8.5 hours to complete.
 
 ## AI tools 
 Firebase Studio:
@@ -49,7 +49,7 @@ Firebase Studio:
 
 Cursor AI (Model: Claude 3.7 Sonnet):
 
-- **Assisted with:** Generating core functionalities including file upload, image previews, form creation and validation, toast notifications, loading spinners, and TypeScript integration.
+- **Assisted with:** Generating core functionalities including file upload, image previews, form creation and validation, toast notifications, loading spinners, TypeScript integration and Refactoring.
   
 - **Contribution:** Significantly sped up the development process by providing functional code blocks. Iterative prompting allowed for refinement and the implementation of almost all requirements.
   
