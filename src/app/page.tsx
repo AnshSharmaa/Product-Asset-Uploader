@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ProductFormData, ProductCategory, ToastData } from "@/types/index";
 
 import ProductForm from "@/components/ProductForm";
 import ImageUploader from "@/components/ImageUploader";
@@ -28,11 +29,11 @@ export default function Home() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: ProductFormData) => ({ ...prev, [name]: value }));
   };
 
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, tags: e.target.value }));
+    setFormData((prev: ProductFormData) => ({ ...prev, tags: e.target.value }));
   };
 
   const handleImagesChange = (newImages: File[]) => {

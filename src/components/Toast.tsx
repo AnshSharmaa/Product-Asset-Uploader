@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ToastProps, ToastVariant } from "@/types/index";
 
 const Toast: React.FC<ToastProps> = ({
   message,

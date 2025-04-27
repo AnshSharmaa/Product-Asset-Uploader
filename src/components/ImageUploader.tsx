@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
+import { ImageUploaderProps, SupportedImageType } from "@/types/index";
 
 export default function ImageUploader({
   images,
@@ -13,46 +14,43 @@ export default function ImageUploader({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle file validation
-  const validateFiles = (files: File[]): File[] => {
-    const validTypes: SupportedImageType[] = [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-    ];
-    return files.filter((file) => {
-      if (!validTypes.includes(file.type)) {
-        onImageError(
-          `Invalid file type: ${file.name}. Only JPG, PNG, and GIF are allowed.`
-        );
-        return false;
-      }
-      return true;
-    });
-  };
-
-  const processFiles = useCallback(
-    (files: File[]) => {
-      setIsLoading(true);
-      const validFiles = validateFiles(files);
-
-      if (validFiles.length === 0) {
-        setIsLoading(false);
-        return;
-      }
-
-      const totalImages = images.length + validFiles.length;
-      if (totalImages > maxImages) {
-        onImageError(`You can only upload a maximum of ${maxImages} images.`);
-        setIsLoading(false);
-        return;
-      }
-
-      // Update files state with valid files
-      onImagesChange([...images, ...validFiles]);
-    },
-    [images, onImagesChange, onImageError, validateFiles]
-  );
+  const processFiles = useCallback((files: File[]) => {
+    setIsLoading(true);
+    
+    const validateFiles = (files: File[]): File[] => {
+      const validTypes: SupportedImageType[] = [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+      ];
+      return files.filter((file) => {
+        if (!validTypes.includes(file.type as SupportedImageType)) {
+          onImageError(
+            `Invalid file type: ${file.name}. Only JPG, PNG, and GIF are allowed.`
+          );
+          return false;
+        }
+        return true;
+      });
+    };
+    
+    const validFiles = validateFiles(files);
+    
+    if (validFiles.length === 0) {
+      setIsLoading(false);
+      return;
+    }
+    
+    const totalImages = images.length + validFiles.length;
+    if (totalImages > maxImages) {
+      onImageError(`You can only upload a maximum of ${maxImages} images.`);
+      setIsLoading(false);
+      return;
+    }
+    
+    // Update files state with valid files
+    onImagesChange([...images, ...validFiles]);
+  }, [images, maxImages, onImagesChange, onImageError]);
 
   const handleFileChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

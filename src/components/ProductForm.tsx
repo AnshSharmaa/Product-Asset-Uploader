@@ -1,5 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import { 
+  ProductCategory, 
+  ProductFormProps, 
+  ValidationErrors, 
+  FormField 
+} from "@/types/index";
 
 const categories: ProductCategory[] = [
   "T-shirt",
