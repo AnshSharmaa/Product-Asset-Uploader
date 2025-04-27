@@ -301,7 +301,7 @@ export default function ImageUploader({
                   onError={() =>
                     onImageError(`Error loading preview ${index + 1}`)
                   }
-                  priority={index === 0} // Prioritize loading the first image
+                  
                 />
                 <button
                   type="button"

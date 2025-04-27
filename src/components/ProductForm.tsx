@@ -126,8 +126,10 @@ export default function ProductForm({
           htmlFor="title"
           className="mb-2 flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors duration-200 group-focus-within:text-primary"
         >
-          <span>Product Title</span>
-          <span className="text-destructive">*</span>
+          <span>Product Title
+          <span className="text-destructive">* </span>
+          <span className="text-xs">(At least 3 characters)</span>
+          </span>
           {formData.title && (
             <span className="ml-auto text-xs text-muted-foreground">
               {formData.title.length} characters
