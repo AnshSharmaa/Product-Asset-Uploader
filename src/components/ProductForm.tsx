@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ProductCategory,
   ProductFormProps,
@@ -23,31 +23,74 @@ const categories: ProductCategory[] = [
   "Accessory",
 ];
 
-export default function ProductForm({
+/**
+ * Custom hook to manage form field focus and touched states
+ */
+const useFormFieldState = (initialFields: Record<FormField, boolean>) => {
+  const [touched, setTouched] = useState<Record<FormField, boolean>>(initialFields);
+  const [focused, setFocused] = useState<FormField | null>(null);
+
+  const handleFocus = useCallback((field: FormField): void => {
+    setFocused(field);
+  }, []);
+
+  const handleBlur = useCallback((field: FormField): void => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    setFocused(null);
+  }, []);
+
+  const resetTouched = useCallback((newState: Record<FormField, boolean>) => {
+    setTouched(newState);
+  }, []);
+
+  const markFieldAsTouched = useCallback((field: FormField): void => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  }, []);
+
+  return {
+    touched,
+    focused,
+    handleFocus,
+    handleBlur,
+    resetTouched,
+    markFieldAsTouched,
+  };
+};
+
+ const ProductForm = ({
   formData,
   onFormChange,
   onTagsChange,
-}: ProductFormProps) {
+}: ProductFormProps)=> {
   const [errors, setErrors] = useState<ValidationErrors>({});
-  const [touched, setTouched] = useState<Record<FormField, boolean>>({
+  
+  const initialTouchState: Record<FormField, boolean> = {
     title: false,
     category: false,
     tags: false,
     images: false,
-  });
-  const [focused, setFocused] = useState<FormField | null>(null);
+  };
+  
+  const {
+    touched,
+    focused,
+    handleFocus,
+    handleBlur,
+    resetTouched,
+    markFieldAsTouched
+  } = useFormFieldState(initialTouchState);
 
   // Reset touched state when formData is reset (empty title indicates form reset)
   useEffect(() => {
     if (!formData.title && !formData.category && !formData.tags) {
-      setTouched({
+      resetTouched({
         title: false,
         category: false,
         tags: false,
         images: false,
       });
     }
-  }, [formData]);
+  }, [formData, resetTouched]);
 
   // Validate form on data change
   useEffect(() => {
@@ -65,17 +108,6 @@ export default function ProductForm({
     setErrors(newErrors);
   }, [formData]);
 
-  // Handle field blur (mark field as touched)
-  const handleBlur = (field: FormField): void => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocused(null);
-  };
-
-  // Handle field focus
-  const handleFocus = (field: FormField): void => {
-    setFocused(field);
-  };
-
   // Handle field change with custom wrapper
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -83,7 +115,7 @@ export default function ProductForm({
     onFormChange(e);
     // Mark field as touched when user starts typing
     const fieldName = e.target.name as FormField;
-    setTouched((prev) => ({ ...prev, [fieldName]: true }));
+    markFieldAsTouched(fieldName);
   };
 
   // Only show errors for touched fields
@@ -286,3 +318,5 @@ export default function ProductForm({
     </div>
   );
 }
+
+export default ProductForm;

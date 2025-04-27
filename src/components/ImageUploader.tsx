@@ -5,6 +5,75 @@ import Image from "next/image";
 import { ImageUploaderProps, SupportedImageType } from "@/types/index";
 import { UploadIcon, TrashIcon, CloseIcon, ImageIcon } from "./icons";
 
+// Define supported image types in a single location
+const SUPPORTED_IMAGE_TYPES: SupportedImageType[] = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+];
+
+// Create a string for the accept attribute
+const ACCEPTED_FILE_TYPES = SUPPORTED_IMAGE_TYPES.join(", ");
+
+/**
+ * Custom hook to handle drag and drop functionality
+ */
+const useDragAndDrop = (onDrop: (files: File[]) => void, isDisabled = false) => {
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDisabled) {
+      setIsDragging(true);
+    }
+  }, [isDisabled]);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Check if the leave event is for the container and not for a child element
+    if (
+      dropZoneRef.current &&
+      !dropZoneRef.current.contains(e.relatedTarget as Node)
+    ) {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+
+      if (isDisabled) {
+        return;
+      }
+
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      onDrop(droppedFiles);
+    },
+    [isDisabled, onDrop]
+  );
+
+  return {
+    isDragging,
+    dropZoneRef,
+    handleDragOver,
+    handleDragEnter,
+    handleDragLeave,
+    handleDrop
+  };
+};
+
 export default function ImageUploader({
   images,
   onImagesChange,
@@ -13,22 +82,15 @@ export default function ImageUploader({
 }: ImageUploaderProps) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const processFiles = useCallback(
     (files: File[]) => {
       setIsLoading(true);
 
       const validateFiles = (files: File[]): File[] => {
-        const validTypes: SupportedImageType[] = [
-          "image/jpeg",
-          "image/png",
-          "image/gif",
-        ];
         return files.filter((file) => {
-          if (!validTypes.includes(file.type as SupportedImageType)) {
+          if (!SUPPORTED_IMAGE_TYPES.includes(file.type as SupportedImageType)) {
             onImageError(
               `Invalid file type: ${file.name}. Only JPG, PNG, and GIF are allowed.`
             );
@@ -58,6 +120,16 @@ export default function ImageUploader({
     [images, maxImages, onImagesChange, onImageError]
   );
 
+  // Initialize the drag and drop hook
+  const {
+    isDragging,
+    dropZoneRef,
+    handleDragOver,
+    handleDragEnter,
+    handleDragLeave,
+    handleDrop
+  } = useDragAndDrop(processFiles, images.length >= maxImages);
+
   const handleFileChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files;
@@ -71,48 +143,6 @@ export default function ImageUploader({
       }
     },
     [processFiles]
-  );
-
-  // Drag and drop handlers
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
-  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // Check if the leave event is for the container and not for a child element
-    if (
-      dropZoneRef.current &&
-      !dropZoneRef.current.contains(e.relatedTarget as Node)
-    ) {
-      setIsDragging(false);
-    }
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
-
-      // Don't allow drops if max images reached
-      if (images.length >= maxImages) {
-        return;
-      }
-
-      const droppedFiles = Array.from(e.dataTransfer.files);
-      processFiles(droppedFiles);
-    },
-    [images.length, maxImages, processFiles]
   );
 
   const handleRemoveImage = useCallback(
@@ -260,7 +290,7 @@ export default function ImageUploader({
               type="file"
               className="hidden"
               multiple
-              accept="image/png, image/jpeg, image/gif"
+              accept={ACCEPTED_FILE_TYPES}
               onChange={handleFileChange}
               disabled={images.length >= maxImages || isLoading}
               aria-label="Upload images"
