@@ -113,7 +113,7 @@ export default function Home() {
   }, [isSuccess]);
 
   return (
-    <main className="min-h-screen  bg-gradient-to-b from-background to-blue-200 p-4 md:p-8 lg:p-12 ">
+    <main className="min-h-screen bg-gradient-to-b from-background to-blue-200 p-4 md:p-8 lg:p-12">
       <Toast
         message={toastData.message}
         isError={toastData.isError}
@@ -128,11 +128,9 @@ export default function Home() {
         }
         duration={toastData.duration}
       />
-      <div className="container mx-auto max-w-7xl ">
+      <div className="container mx-auto max-w-8xl">
         <div className="relative overflow-hidden rounded-xl border border-border/50 p-6 text-card-foreground shadow-xl backdrop-blur-sm md:p-8">
-          {/* Header with decorative elements */}
-
-          <div className="relative z-10 mb-8">
+           <div className="relative z-10 mb-8">
             <h1 className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-center text-2xl font-bold text-transparent md:text-3xl">
               Product Asset Uploader
             </h1>

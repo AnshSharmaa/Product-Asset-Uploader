@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
   	extend: {
+		maxWidth: {
+			"8xl": "150rem",
+		  },
   		colors: {
         // Use HSL variables directly from globals.css
   			background: 'hsl(var(--background))',
