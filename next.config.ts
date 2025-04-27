@@ -9,14 +9,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+    domains: ['localhost'],
   },
 };
 
