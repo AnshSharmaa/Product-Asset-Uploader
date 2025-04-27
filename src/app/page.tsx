@@ -71,13 +71,20 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Validate form
     if (images.length === 0) {
       handleToast({
         message: "At least one image is required",
         isError: true,
       });
       return;
-    }
+    } else if (formData.title.length <= 2 || formData.title.trim() === "") {
+      handleToast({
+        message: "Title must be at least 3 characters long",
+        isError: true,
+      });
+      return;
+    } 
 
     setIsSubmitting(true);
     console.log("Product Info:", formData);
@@ -104,7 +111,7 @@ export default function Home() {
   }, [isSuccess]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-background/80 p-4 md:p-8 lg:p-12 relative">
+    <main className="min-h-screen bg-gradient-to-b from-background to-background/80 p-4 md:p-8 lg:p-12 bg-blue-500">
       <Toast
         message={toastData.message}
         isError={toastData.isError}
@@ -113,13 +120,11 @@ export default function Home() {
           setToastData({ message: "", isError: false, isOpen: false })
         }
       />
-      <div className="container mx-auto max-w-6xl">
-        <div className="bg-card/80 backdrop-blur-sm text-card-foreground rounded-xl shadow-xl border border-border/50 p-6 md:p-8 overflow-hidden relative">
+      <div className="container mx-auto max-w-7xl ">
+        <div className="bg-card/80 backdrop-blur-sm text-card-foreground rounded-xl shadow-xl border border-border/50 p-6 md:p-8  relative  bg-secondary/50">
           {/* Header with decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -ml-32 -mb-32 pointer-events-none"></div>
 
-          <div className="relative z-10 mb-8">
+          <div className="mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
               Product Asset Uploader
             </h1>
@@ -166,7 +171,7 @@ export default function Home() {
                   Product Information
                 </h2>
               </div>
-              <div className="p-4 bg-card rounded-xl border border-border/50 shadow-sm">
+              <div className="p-4 bg-card rounded-xl border border-border/50 shadow-lg">
                 <ProductForm
                   formData={formData}
                   onFormChange={handleFormChange}
@@ -204,7 +209,7 @@ export default function Home() {
                   </span>
                 </h2>
               </div>
-              <div className="p-4 bg-card rounded-xl border border-border/50 shadow-sm">
+              <div className="p-4 bg-card rounded-xl border border-border/50 shadow-lg">
                 <ImageUploader
                   images={images}
                   onImagesChange={handleImagesChange}
